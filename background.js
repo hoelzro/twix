@@ -1,12 +1,4 @@
-let annotationStore = {
-  addAnnotation(attrs) {
-    console.log('got annotation from user', attrs);
-  },
-
-  addFollowUp(attrs) {
-    console.log('got follow-up from user', attrs);
-  },
-};
+import { annotationStore } from './dummy-store.js';
 
 const FOLLOW_UP_ID = 'follow-up';
 const HIGHLIGHT_ID = 'highlight';
