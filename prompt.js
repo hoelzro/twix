@@ -1,7 +1,21 @@
-document.getElementsByTagName('form')[0].addEventListener('submit', function(e) {
-  e.preventDefault();
-  browser.runtime.sendMessage({
-    type: 'promptResult',
-    value: document.getElementById('user-input').value,
+export function prompt(message, value) {
+  let promptURL = browser.runtime.getURL('prompt-popup.html');
+
+  return new Promise(function(resolve, reject) {
+    browser.windows.create({
+      url: promptURL,
+      type: 'popup',
+    }).then(function(w) {
+      function handler(msg, sender) {
+        browser.runtime.onMessage.removeListener(handler);
+        browser.windows.remove(sender.tab.windowId);
+
+        resolve(msg.value);
+      }
+
+      browser.runtime.onMessage.addListener(handler);
+    }, function(e) {
+      reject(e);
+    });
   });
-});
+}

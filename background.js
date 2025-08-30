@@ -1,4 +1,5 @@
 import { annotationStore } from './dummy-store.js';
+import { prompt } from './prompt.js';
 
 const FOLLOW_UP_ID = 'follow-up';
 const HIGHLIGHT_ID = 'highlight';
@@ -36,26 +37,15 @@ browser.menus.onClicked.addListener(function(info, tab) {
       });
       break;
     case ANNOTATE_ID:
-      let promptURL = browser.runtime.getURL('prompt.html');
-      browser.windows.create({
-        url: promptURL,
-        type: 'popup',
-      }).then(function(w) {
-        function handler(msg, sender) {
-          browser.runtime.onMessage.removeListener(handler);
-          browser.windows.remove(sender.tab.windowId);
-
-          let annotation = msg.value;
-          annotationStore.addAnnotation({
-            annotation,
-            selection: info.selectionText,
-          });
-        }
-
-        browser.runtime.onMessage.addListener(handler);
+      prompt('Annotation').then(function(value) {
+        annotationStore.addAnnotation({
+          annotation: value,
+          selection: info.selectionText,
+        });
       }, function(e) {
-        console.error('failed to create prompt window', e);
+        console.error('failed to get annotation from user', e);
       });
+
       break;
   }
 });
