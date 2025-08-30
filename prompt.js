@@ -8,7 +8,6 @@ export function prompt(message, value) {
     }).then(function(w) {
       function handler(msg, sender) {
         browser.runtime.onMessage.removeListener(handler);
-        browser.windows.remove(sender.tab.windowId);
 
         resolve(msg.value);
       }
