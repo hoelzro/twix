@@ -49,3 +49,16 @@ browser.menus.onClicked.addListener(function(info, tab) {
       break;
   }
 });
+
+browser.runtime.onMessage.addListener(function(request, sender, reply) {
+  if(request.type == 'fetchAnnotations') {
+    // XXX fetch them from store
+    reply({
+      annotations: [{
+        text: 'on autopilot',
+      }, {
+        text: "don't outsource chaos",
+      }],
+    });
+  }
+});
