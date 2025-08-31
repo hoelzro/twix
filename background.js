@@ -34,19 +34,19 @@ function addAsyncListener(event, listener) {
 addAsyncListener(browser.menus.onClicked, async function(info, tab) {
   switch(info.menuItemId) {
     case FOLLOW_UP_ID:
-      annotationStore.addFollowUp({
+      await annotationStore.addFollowUp({
         targetURL: info.linkUrl,
       });
       break;
     case HIGHLIGHT_ID:
-      annotationStore.addAnnotation({
+      await annotationStore.addAnnotation({
         annotation: null,
         selection: info.selectionText,
       });
       break;
     case ANNOTATE_ID:
       let annotation = await prompt('Annotation');
-      annotationStore.addAnnotation({
+      await annotationStore.addAnnotation({
         annotation,
 
         selection: info.selectionText,
