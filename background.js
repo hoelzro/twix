@@ -23,7 +23,15 @@ browser.menus.create({
   contexts: ['selection'],
 });
 
-browser.menus.onClicked.addListener(function(info, tab) {
+function addAsyncListener(event, listener) {
+  event.addListener(function(...args) {
+    listener.apply(this, args).catch(function(e) {
+      console.error(e);
+    });
+  });
+}
+
+addAsyncListener(browser.menus.onClicked, async function(info, tab) {
   switch(info.menuItemId) {
     case FOLLOW_UP_ID:
       annotationStore.addFollowUp({
@@ -37,13 +45,11 @@ browser.menus.onClicked.addListener(function(info, tab) {
       });
       break;
     case ANNOTATE_ID:
-      prompt('Annotation').then(function(value) {
-        annotationStore.addAnnotation({
-          annotation: value,
-          selection: info.selectionText,
-        });
-      }, function(e) {
-        console.error('failed to get annotation from user', e);
+      let annotation = await prompt('Annotation');
+      annotationStore.addAnnotation({
+        annotation,
+
+        selection: info.selectionText,
       });
 
       break;
