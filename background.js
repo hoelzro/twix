@@ -56,15 +56,10 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
   }
 });
 
-browser.runtime.onMessage.addListener(function(request, sender, reply) {
+addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
   if(request.type == 'fetchAnnotations') {
-    // XXX fetch them from store
-    reply({
-      annotations: [{
-        text: 'on autopilot',
-      }, {
-        text: "don't outsource chaos",
-      }],
-    });
+    return {
+        annotations: await annotationStore.getAnnotations(),
+    };
   }
 });
