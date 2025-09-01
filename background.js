@@ -25,7 +25,7 @@ browser.menus.create({
 
 function addAsyncListener(event, listener) {
   event.addListener(function(...args) {
-    listener.apply(this, args).catch(function(e) {
+    return listener.apply(this, args).catch(function(e) {
       console.error(e);
     });
   });
