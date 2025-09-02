@@ -8,7 +8,7 @@ browser.runtime.sendMessage({
     nodes.push(node);
   }
 
-  let fullText = nodes.map(node => node.textContent).join('');
+  let fullText = nodes.map(node => node.textContent.replace(/[ \t\n\f\r]+/g, ' ')).join('');
   let nodePositions = nodes.reduce((accum, node) => accum.concat([{node, start: accum[accum.length - 1].end, end: accum[accum.length - 1].end + node.textContent.length}]), [{start: 0, end: 0}]).slice(1);
 
   let ranges = [];
