@@ -61,5 +61,16 @@ addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
     return {
         annotations: await annotationStore.getAnnotations(),
     };
+  } else if(request.type == 'ready') {
+    browser.tabs.sendMessage(sender.tab.id, {
+        type: 'annotationUpdate',
+        annotations: await annotationStore.getAnnotations(),
+    }, {
+      frameId: sender.frameId,
+    });
+
+    return {
+      ok: true,
+    };
   }
 });
