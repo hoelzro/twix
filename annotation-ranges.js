@@ -53,17 +53,17 @@ export function getAnnotationRanges(nodes, annotations) {
     let endIndex = startIndex + text.length;
 
     let startMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= startIndex && startIndex < postEndIndex);
-    let endMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= endIndex && endIndex < postEndIndex);
+    let endMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= endIndex && endIndex <= postEndIndex);
 
     // XXX try to come up with a better name for a new variable for this?
     startIndex = startMapping.preStartIndex + (startIndex - startMapping.postStartIndex);
     endIndex = endMapping.preStartIndex + (endIndex - endMapping.postStartIndex);
 
     let startPosition = nodePositions.find(({start, end}) => startIndex >= start && startIndex < end);
-    let endPosition = nodePositions.findLast(({start, end}) => endIndex >= start && endIndex < end);
+    let endPosition = nodePositions.findLast(({start, end}) => endIndex > start && endIndex <= end)
 
     let startOffset = startIndex - startPosition.start;
-    let endOffset = startIndex + text.length - endPosition.start;
+    let endOffset = endIndex - endPosition.start;
 
     let range = document.createRange();
     range.setStart(startPosition.node, startOffset);
