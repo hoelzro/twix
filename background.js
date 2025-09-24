@@ -34,19 +34,19 @@ function addAsyncListener(event, listener) {
 addAsyncListener(browser.menus.onClicked, async function(info, tab) {
   switch(info.menuItemId) {
     case FOLLOW_UP_ID:
-      await annotationStore.addFollowUp({
+      await annotationStore.addFollowUp(tab.url, {
         targetURL: info.linkUrl,
       });
       break;
     case HIGHLIGHT_ID:
-      await annotationStore.addAnnotation({
+      await annotationStore.addAnnotation(tab.url, {
         annotation: null,
         selection: info.selectionText,
       });
       break;
     case ANNOTATE_ID:
       let annotation = await prompt('Annotation');
-      await annotationStore.addAnnotation({
+      await annotationStore.addAnnotation(tab.url, {
         annotation,
 
         selection: info.selectionText,
@@ -59,12 +59,12 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
   if(request.type == 'fetchAnnotations') {
     return {
-        annotations: await annotationStore.getAnnotations(),
+        annotations: await annotationStore.getAnnotations(request.url),
     };
   } else if(request.type == 'ready') {
     browser.tabs.sendMessage(sender.tab.id, {
         type: 'annotationUpdate',
-        annotations: await annotationStore.getAnnotations(),
+        annotations: await annotationStore.getAnnotations(sender.url),
     }, {
       frameId: sender.frameId,
     });
