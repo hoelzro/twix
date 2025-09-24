@@ -54,6 +54,12 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 
       break;
   }
+  browser.tabs.sendMessage(tab.id, {
+      type: 'annotationUpdate',
+      annotations: await annotationStore.getAnnotations(tab.url),
+  }, {
+    frameId: info.frameId,
+  });
 });
 
 addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
