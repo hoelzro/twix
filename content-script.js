@@ -28,10 +28,11 @@ browser.runtime.onMessage.addListener(function(msg) {
       nodes.push(node);
     }
 
-    let ranges = getAnnotationRanges(nodes, annotations);
+    let rangeMap = getAnnotationRanges(nodes, annotations);
+    let allRanges = Array.from(rangeMap.values()).flat();
 
-    CSS.highlights.set('annotation-highlight', new Highlight(...ranges));
-    console.log('our ranges:', ranges);
+    CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
+    console.log('our ranges:', allRanges);
   }
 });
 
