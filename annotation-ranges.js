@@ -38,15 +38,17 @@ export function getAnnotationRanges(nodes, annotations) {
 
   let nodePositions = nodes.reduce((accum, node) => accum.concat([{node, start: accum[accum.length - 1].end, end: accum[accum.length - 1].end + node.textContent.length}]), [{start: 0, end: 0}]).slice(1);
 
-  let ranges = [];
+  let rangeMap = new Map();
 
-  for(let {text} of annotations) {
+  for(let annotation of annotations) {
+    let { text } = annotation;
     // XXX all positions, please
     let startIndex = fullTextCollapsed.indexOf(text);
 
     // XXX ah shit
     if(startIndex == -1) {
       console.log('unable to find text: ', text);
+      rangeMap.set(annotation, []);
       continue;
     }
 
@@ -69,9 +71,9 @@ export function getAnnotationRanges(nodes, annotations) {
     range.setStart(startPosition.node, startOffset);
     range.setEnd(endPosition.node, endOffset);
 
-    ranges.push(range);
+    rangeMap.set(annotation, [range]);
     // XXX there's this kind of "double mapping" there going on, which I find kinda convoluted and confusing
   }
 
-  return ranges;
+  return rangeMap;
 }
