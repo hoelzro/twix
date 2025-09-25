@@ -218,3 +218,147 @@ test('Overlapping text with different whitespace 2', () => {
   assert.ok(ranges[0].startOffset >= 0);
   assert.ok(ranges[1].startOffset >= 0);
 });
+
+test('Consecutive special whitespace characters', () => {
+  const nodes = [new MockTextNode('hello\n\n\nworld\t\n\ttest')];
+  const annotations = [
+    { text: 'hello world' },
+    { text: 'world test' }
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Mixed whitespace starting with spaces', () => {
+  const nodes = [new MockTextNode('hello   \nworld    \ttest')];
+  const annotations = [{ text: 'hello world test' }];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 1);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, nodes[0].textContent.length);
+});
+
+test('Form feed and carriage return characters', () => {
+  const nodes = [new MockTextNode('hello\fworld\rtest')];
+  const annotations = [
+    { text: 'hello world' },
+    { text: 'world test' }
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Exactly two whitespace characters boundary', () => {
+  const nodes = [new MockTextNode('hello  world\n\ntest')];
+  const annotations = [
+    { text: 'hello world' },
+    { text: 'world test' }
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Text starting and ending with collapsible whitespace', () => {
+  const nodes = [new MockTextNode('  \nhello  world  \t')];
+  const annotations = [{ text: 'hello world' }];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 1);
+  assert.ok(ranges[0].startOffset >= 0);
+});
+
+test('Very long whitespace sequences', () => {
+  const nodes = [new MockTextNode('hello          world\n\n\n\n\n\n\n\n\n\ntest')];
+  const annotations = [
+    { text: 'hello world' },
+    { text: 'world test' }
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Non-breaking space should NOT be collapsed', () => {
+  const nodes = [new MockTextNode('hello\u00A0\u00A0world\u00A0test')];
+  const annotations = [
+    { text: 'hello\u00A0\u00A0world' }, // Should match exactly with double nbsp
+    { text: 'world\u00A0test' }      // Should match exactly with single nbsp
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Em space and en space should NOT be collapsed', () => {
+  const nodes = [new MockTextNode('hello\u2003\u2003world\u2002test')]; // em space + en space
+  const annotations = [
+    { text: 'hello\u2003\u2003world' }, // Should match with double em space
+    { text: 'world\u2002test' }        // Should match with en space
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Thin space and zero-width space should NOT be collapsed', () => {
+  const nodes = [new MockTextNode('hello\u2009\u2009world\u200Btest')]; // thin space + zero-width space
+  const annotations = [
+    { text: 'hello\u2009\u2009world' }, // Should match with double thin space
+    { text: 'world\u200Btest' }        // Should match with zero-width space
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
+
+test('Mixed HTML and non-HTML whitespace', () => {
+  const nodes = [new MockTextNode('hello  \u00A0world\n\n\u2003test')]; // HTML spaces + nbsp + newlines + em space
+  const annotations = [
+    { text: 'hello \u00A0world \u2003test' } // Should collapse HTML whitespace but preserve Unicode whitespace exactly
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 1);
+  assert.ok(ranges[0].startOffset >= 0);
+});
+
+test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
+  const nodes = [new MockTextNode('hello\u00A0world\u2003test')]; // Single nbsp and em space
+  const annotations = [
+    { text: 'hello\u00A0world\u2003test' } // Should match exactly - no collapsing
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 1);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, nodes[0].textContent.length);
+});
