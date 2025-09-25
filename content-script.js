@@ -32,7 +32,6 @@ browser.runtime.onMessage.addListener(function(msg) {
     let allRanges = Array.from(rangeMap.values()).flat();
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
-    console.log('our ranges:', allRanges);
   }
 });
 

@@ -47,7 +47,6 @@ export function getAnnotationRanges(nodes, annotations) {
 
     // XXX ah shit
     if(startIndex == -1) {
-      console.log('unable to find text: ', text);
       rangeMap.set(annotation, []);
       continue;
     }
