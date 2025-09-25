@@ -43,9 +43,11 @@ global.document = {
 test('Single node annotation without whitespace collapse', () => {
   const nodes = [new MockTextNode('hello world test')];
   const annotations = [{ text: 'world' }];
-  
-  const ranges = getAnnotationRanges(nodes, annotations);
-  
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startContainer, nodes[0]);
   assert.strictEqual(ranges[0].startOffset, 6);
@@ -61,8 +63,10 @@ test('Multi-node annotation without whitespace collapse', () => {
   ];
   const annotations = [{ text: 'world test' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startContainer, nodes[1]); // 'world' node
   assert.strictEqual(ranges[0].startOffset, 0);
@@ -74,8 +78,10 @@ test('Annotation spanning collapsed whitespace', () => {
   const nodes = [new MockTextNode('hello  world test')];
   const annotations = [{ text: 'hello world' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startContainer, nodes[0]);
   assert.strictEqual(ranges[0].startOffset, 0);
@@ -87,8 +93,10 @@ test('Annotation after collapsed whitespace', () => {
   const nodes = [new MockTextNode('hello  world test')];
   const annotations = [{ text: 'world' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startContainer, nodes[0]);
   assert.strictEqual(ranges[0].startOffset, 7); // After the double space
@@ -104,21 +112,33 @@ test('Multiple annotations with whitespace collapse', () => {
     { text: 'more' }
   ];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
-  assert.strictEqual(ranges.length, 3);
-  
+  assert.strictEqual(rangeMap.size, 3);
+
   // First annotation: 'hello'
-  assert.strictEqual(ranges[0].startOffset, 0);
-  assert.strictEqual(ranges[0].endOffset, 5);
-  
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 5);
+  }
+
   // Second annotation: 'world'
-  assert.strictEqual(ranges[1].startOffset, 7);
-  assert.strictEqual(ranges[1].endOffset, 12);
-  
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.strictEqual(ranges[0].startOffset, 7);
+    assert.strictEqual(ranges[0].endOffset, 12);
+  }
+
   // Third annotation: 'more'
-  assert.strictEqual(ranges[2].startOffset, 18);
-  assert.strictEqual(ranges[2].endOffset, 22);
+  {
+    const ranges = rangeMap.get(annotations[2]);
+    assert.strictEqual(ranges.length, 1);
+    assert.strictEqual(ranges[0].startOffset, 18);
+    assert.strictEqual(ranges[0].endOffset, 22);
+  }
 });
 
 test('Annotation spanning multiple nodes with whitespace collapse', () => {
@@ -128,8 +148,10 @@ test('Annotation spanning multiple nodes with whitespace collapse', () => {
   ];
   const annotations = [{ text: 'hello world' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   
   assert.strictEqual(ranges[0].startContainer, nodes[0]); // Start in first node
@@ -141,9 +163,11 @@ test('Annotation spanning multiple nodes with whitespace collapse', () => {
 test('Annotation not found', () => {
   const nodes = [new MockTextNode('hello world')];
   const annotations = [{ text: 'nonexistent' }];
-  
-  const ranges = getAnnotationRanges(nodes, annotations);
-  
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 0);
 });
 
@@ -151,8 +175,10 @@ test('Annotation at very beginning', () => {
   const nodes = [new MockTextNode('hello  world')];
   const annotations = [{ text: 'hello' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startOffset, 0);
   assert.strictEqual(ranges[0].endOffset, 5);
@@ -162,8 +188,10 @@ test('Annotation at very end', () => {
   const nodes = [new MockTextNode('hello  world')];
   const annotations = [{ text: 'world' }];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startOffset, 7);
   assert.strictEqual(ranges[0].endOffset, 12);
@@ -180,13 +208,22 @@ test('Complex multi-node scenario with various whitespace', () => {
     { text: 'fox jumps' }
   ];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
-  assert.strictEqual(ranges.length, 2);
+  assert.strictEqual(rangeMap.size, 2);
   
   // Both ranges should be created successfully
-  assert.ok(ranges[0].startContainer !== null);
-  assert.ok(ranges[1].startContainer !== null);
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startContainer !== null);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startContainer !== null);
+  }
 });
 
 test('Overlapping text with different whitespace', () => {
@@ -196,12 +233,21 @@ test('Overlapping text with different whitespace', () => {
     { text: 'world test' }
   ];
   
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
   
-  assert.strictEqual(ranges.length, 2);
+  assert.strictEqual(rangeMap.size, 2);
   // Both should find their text in the collapsed version
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Overlapping text with different whitespace 2', () => {
@@ -211,12 +257,21 @@ test('Overlapping text with different whitespace 2', () => {
     { text: 'world test' }
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
+  assert.strictEqual(rangeMap.size, 2);
   // Both should find their text in the collapsed version
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Consecutive special whitespace characters', () => {
@@ -226,19 +281,31 @@ test('Consecutive special whitespace characters', () => {
     { text: 'world test' }
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Mixed whitespace starting with spaces', () => {
   const nodes = [new MockTextNode('hello   \nworld    \ttest')];
   const annotations = [{ text: 'hello world test' }];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startOffset, 0);
   assert.strictEqual(ranges[0].endOffset, nodes[0].textContent.length);
@@ -251,11 +318,21 @@ test('Form feed and carriage return characters', () => {
     { text: 'world test' }
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Exactly two whitespace characters boundary', () => {
@@ -265,19 +342,31 @@ test('Exactly two whitespace characters boundary', () => {
     { text: 'world test' }
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Text starting and ending with collapsible whitespace', () => {
   const nodes = [new MockTextNode('  \nhello  world  \t')];
   const annotations = [{ text: 'hello world' }];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.ok(ranges[0].startOffset >= 0);
 });
@@ -289,11 +378,21 @@ test('Very long whitespace sequences', () => {
     { text: 'world test' }
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Non-breaking space should NOT be collapsed', () => {
@@ -303,11 +402,21 @@ test('Non-breaking space should NOT be collapsed', () => {
     { text: 'world\u00A0test' }      // Should match exactly with single nbsp
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Em space and en space should NOT be collapsed', () => {
@@ -317,11 +426,21 @@ test('Em space and en space should NOT be collapsed', () => {
     { text: 'world\u2002test' }        // Should match with en space
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Thin space and zero-width space should NOT be collapsed', () => {
@@ -331,11 +450,21 @@ test('Thin space and zero-width space should NOT be collapsed', () => {
     { text: 'world\u200Btest' }        // Should match with zero-width space
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
-  assert.strictEqual(ranges.length, 2);
-  assert.ok(ranges[0].startOffset >= 0);
-  assert.ok(ranges[1].startOffset >= 0);
+  assert.strictEqual(rangeMap.size, 2);
+
+  {
+    const ranges = rangeMap.get(annotations[0]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
+
+  {
+    const ranges = rangeMap.get(annotations[1]);
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].startOffset >= 0);
+  }
 });
 
 test('Mixed HTML and non-HTML whitespace', () => {
@@ -344,8 +473,10 @@ test('Mixed HTML and non-HTML whitespace', () => {
     { text: 'hello \u00A0world \u2003test' } // Should collapse HTML whitespace but preserve Unicode whitespace exactly
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.ok(ranges[0].startOffset >= 0);
 });
@@ -356,8 +487,10 @@ test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
     { text: 'hello\u00A0world\u2003test' } // Should match exactly - no collapsing
   ];
 
-  const ranges = getAnnotationRanges(nodes, annotations);
+  const rangeMap = getAnnotationRanges(nodes, annotations);
 
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
   assert.strictEqual(ranges.length, 1);
   assert.strictEqual(ranges[0].startOffset, 0);
   assert.strictEqual(ranges[0].endOffset, nodes[0].textContent.length);
