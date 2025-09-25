@@ -6,7 +6,7 @@ export function getAnnotationRanges(nodes, annotations) {
   let fullTextCollapsed = '';
 
   // XXX this RE probably needs refinement
-  for(let m of fullText.matchAll(/(?:[ ]{2,})|[\f\n\t\r]/gd)) {
+  for(let m of fullText.matchAll(/(?:[ \f\n\t\r]{2,})|[\f\n\t\r]+/gd)) {
     let preEndIndex = m.index + m[0].length;
     let postEndIndex = m.index - (preStartIndex - postStartIndex) + 1; // XXX I *think* this is correct, and that this is the best way?
 
