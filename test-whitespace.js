@@ -203,3 +203,18 @@ test('Overlapping text with different whitespace', () => {
   assert.ok(ranges[0].startOffset >= 0);
   assert.ok(ranges[1].startOffset >= 0);
 });
+
+test('Overlapping text with different whitespace 2', () => {
+  const nodes = [new MockTextNode('hello\n   world    test')];
+  const annotations = [
+    { text: 'hello world' },
+    { text: 'world test' }
+  ];
+
+  const ranges = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(ranges.length, 2);
+  // Both should find their text in the collapsed version
+  assert.ok(ranges[0].startOffset >= 0);
+  assert.ok(ranges[1].startOffset >= 0);
+});
