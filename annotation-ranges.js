@@ -42,35 +42,34 @@ export function getAnnotationRanges(nodes, annotations) {
 
   for(let annotation of annotations) {
     let { text } = annotation;
-    // XXX all positions, please
-    let startIndex = fullTextCollapsed.indexOf(text);
+    let ranges = [];
 
-    // XXX ah shit
-    if(startIndex == -1) {
-      rangeMap.set(annotation, []);
-      continue;
+    let startIndex = -1;
+
+    while((startIndex = fullTextCollapsed.indexOf(text, startIndex + 1)) != -1) {
+      let endIndex = startIndex + text.length;
+
+      let startMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= startIndex && startIndex < postEndIndex);
+      let endMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= endIndex && endIndex <= postEndIndex);
+
+      // XXX try to come up with a better name for a new variable for this?
+      startIndex = startMapping.preStartIndex + (startIndex - startMapping.postStartIndex);
+      endIndex = endMapping.preStartIndex + (endIndex - endMapping.postStartIndex);
+
+      let startPosition = nodePositions.find(({start, end}) => startIndex >= start && startIndex < end);
+      let endPosition = nodePositions.findLast(({start, end}) => endIndex > start && endIndex <= end)
+
+      let startOffset = startIndex - startPosition.start;
+      let endOffset = endIndex - endPosition.start;
+
+      let range = document.createRange();
+      range.setStart(startPosition.node, startOffset);
+      range.setEnd(endPosition.node, endOffset);
+
+      ranges.push(range);
     }
 
-    let endIndex = startIndex + text.length;
-
-    let startMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= startIndex && startIndex < postEndIndex);
-    let endMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= endIndex && endIndex <= postEndIndex);
-
-    // XXX try to come up with a better name for a new variable for this?
-    startIndex = startMapping.preStartIndex + (startIndex - startMapping.postStartIndex);
-    endIndex = endMapping.preStartIndex + (endIndex - endMapping.postStartIndex);
-
-    let startPosition = nodePositions.find(({start, end}) => startIndex >= start && startIndex < end);
-    let endPosition = nodePositions.findLast(({start, end}) => endIndex > start && endIndex <= end)
-
-    let startOffset = startIndex - startPosition.start;
-    let endOffset = endIndex - endPosition.start;
-
-    let range = document.createRange();
-    range.setStart(startPosition.node, startOffset);
-    range.setEnd(endPosition.node, endOffset);
-
-    rangeMap.set(annotation, [range]);
+    rangeMap.set(annotation, ranges);
     // XXX there's this kind of "double mapping" there going on, which I find kinda convoluted and confusing
   }
 
