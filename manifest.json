@@ -4,6 +4,7 @@
     "version": "0.1",
     "permissions": [
       "menus",
+      "notifications",
       "storage",
       "tabs"
     ],

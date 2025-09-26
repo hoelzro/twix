@@ -31,6 +31,19 @@ browser.runtime.onMessage.addListener(function(msg) {
     let rangeMap = getAnnotationRanges(nodes, annotations);
     let allRanges = Array.from(rangeMap.values()).flat();
 
+    for(let [annotation, ranges] of rangeMap.entries()) {
+      if(ranges.length !== 1) {
+        let message = (ranges.length == 0
+          ? `No matches found for annotation: "${annotation.text || annotation.selection}"`
+          :`${ranges.length} matches found for annotation: "${annotation.text || annotation.selection}"`);
+
+        browser.runtime.sendMessage({
+          type: 'showNotification',
+          message: message,
+        });
+      }
+    }
+
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
   }
 });

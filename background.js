@@ -78,5 +78,15 @@ addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
     return {
       ok: true,
     };
+  } else if(request.type == 'showNotification') {
+    let { annotation, message } = request;
+    let title = 'Annotation Match Issue';
+
+    browser.notifications.create({
+      type: 'basic',
+      iconUrl: browser.runtime.getURL('icons/48.png'),
+      title: title,
+      message: message,
+    });
   }
 });
