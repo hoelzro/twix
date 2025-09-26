@@ -232,21 +232,23 @@ test('Overlapping text with different whitespace', () => {
     { text: 'hello world' },
     { text: 'world test' }
   ];
-  
+
   const rangeMap = getAnnotationRanges(nodes, annotations);
-  
+
   assert.strictEqual(rangeMap.size, 2);
   // Both should find their text in the collapsed version
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 14);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 9);
+    assert.strictEqual(ranges[0].endOffset, 22);
   }
 });
 
@@ -264,13 +266,15 @@ test('Overlapping text with different whitespace 2', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 14);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 9);
+    assert.strictEqual(ranges[0].endOffset, 22);
   }
 });
 
@@ -288,13 +292,15 @@ test('Consecutive special whitespace characters', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 13);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 8);
+    assert.strictEqual(ranges[0].endOffset, 20);
   }
 });
 
@@ -325,13 +331,15 @@ test('Form feed and carriage return characters', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 11);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 6);
+    assert.strictEqual(ranges[0].endOffset, 16);
   }
 });
 
@@ -349,13 +357,15 @@ test('Exactly two whitespace characters boundary', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 12);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 7);
+    assert.strictEqual(ranges[0].endOffset, 18);
   }
 });
 
@@ -385,13 +395,15 @@ test('Very long whitespace sequences', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 20);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 15);
+    assert.strictEqual(ranges[0].endOffset, 34);
   }
 });
 
@@ -409,13 +421,15 @@ test('Non-breaking space should NOT be collapsed', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 12);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 7);
+    assert.strictEqual(ranges[0].endOffset, 17);
   }
 });
 
@@ -433,13 +447,15 @@ test('Em space and en space should NOT be collapsed', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 12);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 7);
+    assert.strictEqual(ranges[0].endOffset, 17);
   }
 });
 
@@ -457,13 +473,15 @@ test('Thin space and zero-width space should NOT be collapsed', () => {
   {
     const ranges = rangeMap.get(annotations[0]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 0);
+    assert.strictEqual(ranges[0].endOffset, 12);
   }
 
   {
     const ranges = rangeMap.get(annotations[1]);
     assert.strictEqual(ranges.length, 1);
-    assert.ok(ranges[0].startOffset >= 0);
+    assert.strictEqual(ranges[0].startOffset, 7);
+    assert.strictEqual(ranges[0].endOffset, 17);
   }
 });
 
