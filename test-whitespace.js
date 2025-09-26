@@ -513,3 +513,187 @@ test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
   assert.strictEqual(ranges[0].startOffset, 0);
   assert.strictEqual(ranges[0].endOffset, nodes[0].textContent.length);
 });
+
+test('Multiple occurrences of same annotation in single node', () => {
+  const nodes = [new MockTextNode('hello world hello again')];
+  const annotations = [{ text: 'hello' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 2);
+
+  // First occurrence
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 5);
+
+  // Second occurrence
+  assert.strictEqual(ranges[1].startContainer, nodes[0]);
+  assert.strictEqual(ranges[1].startOffset, 12);
+  assert.strictEqual(ranges[1].endOffset, 17);
+});
+
+test('Multiple occurrences across different nodes', () => {
+  const nodes = [
+    new MockTextNode('hello world '),
+    new MockTextNode('hello again'),
+  ];
+  const annotations = [{ text: 'hello' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 2);
+
+  // First occurrence in first node
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 5);
+
+  // Second occurrence in second node
+  assert.strictEqual(ranges[1].startContainer, nodes[1]);
+  assert.strictEqual(ranges[1].startOffset, 0);
+  assert.strictEqual(ranges[1].endOffset, 5);
+});
+
+test('Multiple occurrences with whitespace collapsing', () => {
+  const nodes = [new MockTextNode('hello  world  hello  again')];
+  const annotations = [{ text: 'hello' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 2);
+
+  // First occurrence
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 5);
+
+  // Second occurrence (after collapsed whitespace)
+  assert.strictEqual(ranges[1].startContainer, nodes[0]);
+  assert.strictEqual(ranges[1].startOffset, 14);
+  assert.strictEqual(ranges[1].endOffset, 19);
+});
+
+test('Three occurrences of same annotation', () => {
+  const nodes = [new MockTextNode('test one test two test three')];
+  const annotations = [{ text: 'test' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 3);
+
+  // First occurrence
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 4);
+
+  // Second occurrence
+  assert.strictEqual(ranges[1].startOffset, 9);
+  assert.strictEqual(ranges[1].endOffset, 13);
+
+  // Third occurrence
+  assert.strictEqual(ranges[2].startOffset, 18);
+  assert.strictEqual(ranges[2].endOffset, 22);
+});
+
+test('Overlapping text with multiple occurrences', () => {
+  const nodes = [new MockTextNode('abcabc test abcabc')];
+  const annotations = [{ text: 'abc' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 4);
+
+  // Four occurrences of 'abc'
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 3);
+
+  assert.strictEqual(ranges[1].startOffset, 3);
+  assert.strictEqual(ranges[1].endOffset, 6);
+
+  assert.strictEqual(ranges[2].startOffset, 12);
+  assert.strictEqual(ranges[2].endOffset, 15);
+
+  assert.strictEqual(ranges[3].startOffset, 15);
+  assert.strictEqual(ranges[3].endOffset, 18);
+});
+
+test('Multiple annotations with multiple occurrences each', () => {
+  const nodes = [new MockTextNode('cat dog cat mouse dog cat')];
+  const annotations = [
+    { text: 'cat' },
+    { text: 'dog' },
+  ];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 2);
+
+  // Cat annotations
+  const catRanges = rangeMap.get(annotations[0]);
+  assert.strictEqual(catRanges.length, 3);
+  assert.strictEqual(catRanges[0].startOffset, 0);
+  assert.strictEqual(catRanges[0].endOffset, 3);
+  assert.strictEqual(catRanges[1].startOffset, 8);
+  assert.strictEqual(catRanges[1].endOffset, 11);
+  assert.strictEqual(catRanges[2].startOffset, 22);
+  assert.strictEqual(catRanges[2].endOffset, 25);
+
+  // Dog annotations
+  const dogRanges = rangeMap.get(annotations[1]);
+  assert.strictEqual(dogRanges.length, 2);
+  assert.strictEqual(dogRanges[0].startOffset, 4);
+  assert.strictEqual(dogRanges[0].endOffset, 7);
+  assert.strictEqual(dogRanges[1].startOffset, 18);
+  assert.strictEqual(dogRanges[1].endOffset, 21);
+});
+
+test('No occurrences should return empty ranges array', () => {
+  const nodes = [new MockTextNode('hello world')];
+  const annotations = [{ text: 'nonexistent' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 0);
+});
+
+test('Multiple occurrences across nodes with whitespace collapse', () => {
+  const nodes = [
+    new MockTextNode('test  one\n'),
+    new MockTextNode('test\ttwo  '),
+    new MockTextNode('test three')
+  ];
+  const annotations = [{ text: 'test' }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 3);
+
+  // Should find all three occurrences despite whitespace collapsing
+  assert.strictEqual(ranges.length, 3);
+
+  assert.ok(ranges[0].startContainer !== null);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endOffset, 4);
+
+  assert.ok(ranges[1].startContainer !== null);
+  assert.strictEqual(ranges[1].startOffset, 0);
+  assert.strictEqual(ranges[1].endOffset, 4);
+
+  assert.ok(ranges[2].startContainer !== null);
+  assert.strictEqual(ranges[2].startOffset, 0);
+  assert.strictEqual(ranges[2].endOffset, 4);
+});
