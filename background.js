@@ -32,6 +32,8 @@ function addAsyncListener(event, listener) {
 }
 
 addAsyncListener(browser.menus.onClicked, async function(info, tab) {
+  let newAnnotationId = null;
+
   switch(info.menuItemId) {
     case FOLLOW_UP_ID:
       await annotationStore.addFollowUp(tab.url, {
@@ -39,24 +41,32 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
       });
       break;
     case HIGHLIGHT_ID:
-      await annotationStore.addAnnotation(tab.url, {
+      newAnnotationId = await annotationStore.addAnnotation(tab.url, {
         annotation: null,
         selection: info.selectionText,
       });
       break;
     case ANNOTATE_ID:
       let annotation = await prompt('Annotation');
-      await annotationStore.addAnnotation(tab.url, {
+      newAnnotationId = await annotationStore.addAnnotation(tab.url, {
         annotation,
-
         selection: info.selectionText,
       });
-
       break;
   }
+
+  let annotations = await annotationStore.getAnnotations(tab.url);
+
+  if(newAnnotationId && info.targetElementId) {
+    let newAnnotation = annotations.find(a => a.id == newAnnotationId);
+    if(newAnnotation) {
+      newAnnotation.expectedElementId = info.targetElementId;
+    }
+  }
+
   browser.tabs.sendMessage(tab.id, {
       type: 'annotationUpdate',
-      annotations: await annotationStore.getAnnotations(tab.url),
+      annotations: annotations,
   }, {
     frameId: info.frameId,
   });

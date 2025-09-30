@@ -42,6 +42,20 @@ browser.runtime.onMessage.addListener(function(msg) {
           message: message,
         });
       }
+
+      if(annotation.expectedElementId) {
+        let targetElement = browser.menus.getTargetElement(annotation.expectedElementId);
+        if(targetElement) {
+          let verificationPassed = ranges.some(range => range.intersectsNode(targetElement));
+          if(!verificationPassed) {
+            browser.runtime.sendMessage({
+              type: 'showNotification',
+
+              message: `Round-trip verification failed for annotation: "${annotation.text}". The highlighted text may not match your original selection.`,
+            });
+          }
+        }
+      }
     }
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
