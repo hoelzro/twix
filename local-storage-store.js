@@ -1,4 +1,10 @@
 export let annotationStore = {
+  async getAllAnnotations() {
+    let results = await browser.storage.local.get();
+
+    return Object.entries(results).map(([id, annotation]) => ({id, ...annotation}));
+  },
+
   async getAnnotations(targetURL) {
     let results = await browser.storage.local.get();
 
