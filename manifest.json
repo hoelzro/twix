@@ -3,6 +3,7 @@
     "name": "Rob's Annotator",
     "version": "0.1",
     "permissions": [
+      "downloads",
       "menus",
       "notifications",
       "storage",
