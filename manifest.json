@@ -19,5 +19,8 @@
       "matches": ["<all_urls>"],
       "js": ["content-script.js"],
       "css": ["content-script.css"]
-    }]
+    }],
+    "options_ui": {
+      "page": "options.html"
+    }
 }
