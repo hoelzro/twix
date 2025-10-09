@@ -41,17 +41,36 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
       });
       break;
     case HIGHLIGHT_ID:
-      newAnnotationId = await annotationStore.addAnnotation(tab.url, {
-        annotation: null,
-        selection: info.selectionText,
-      });
+      {
+        let selectionMetadata = await browser.tabs.sendMessage(tab.id, {
+            type: 'getSelectionMetadata',
+        }, {
+          frameId: info.frameId,
+        });
+
+        newAnnotationId = await annotationStore.addAnnotation(tab.url, {
+          annotation: null,
+          selection: info.selectionText,
+          metadata: selectionMetadata,
+        });
+      }
+
       break;
     case ANNOTATE_ID:
-      let annotation = await prompt('Annotation');
-      newAnnotationId = await annotationStore.addAnnotation(tab.url, {
-        annotation,
-        selection: info.selectionText,
-      });
+      {
+        let selectionMetadata = await browser.tabs.sendMessage(tab.id, {
+            type: 'getSelectionMetadata',
+        }, {
+          frameId: info.frameId,
+        });
+
+        let annotation = await prompt('Annotation');
+        newAnnotationId = await annotationStore.addAnnotation(tab.url, {
+          annotation,
+          selection: info.selectionText,
+          metadata: selectionMetadata,
+        });
+      }
       break;
   }
 
