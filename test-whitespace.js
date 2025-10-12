@@ -42,7 +42,16 @@ global.document = {
 
 test('Single node annotation without whitespace collapse', () => {
   const nodes = [new MockTextNode('hello world test')];
-  const annotations = [{ text: 'world' }];
+  const annotations = [{
+    text: 'world',
+    metadata: {
+      ranges: [{
+        startOffset: 6,
+        endOffset: 11,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -61,8 +70,17 @@ test('Multi-node annotation without whitespace collapse', () => {
     new MockTextNode('world'),
     new MockTextNode(' test')
   ];
-  const annotations = [{ text: 'world test' }];
-  
+  const annotations = [{
+    text: 'world test',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(1, 3),
+      }],
+    },
+  }];
+
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
   assert.strictEqual(rangeMap.size, 1);
@@ -76,8 +94,17 @@ test('Multi-node annotation without whitespace collapse', () => {
 
 test('Annotation spanning collapsed whitespace', () => {
   const nodes = [new MockTextNode('hello  world test')];
-  const annotations = [{ text: 'hello world' }];
-  
+  const annotations = [{
+    text: 'hello world',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 12,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
+
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
   assert.strictEqual(rangeMap.size, 1);
@@ -91,8 +118,17 @@ test('Annotation spanning collapsed whitespace', () => {
 
 test('Annotation after collapsed whitespace', () => {
   const nodes = [new MockTextNode('hello  world test')];
-  const annotations = [{ text: 'world' }];
-  
+  const annotations = [{
+    text: 'world',
+    metadata: {
+      ranges: [{
+        startOffset: 7,
+        endOffset: 12,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
+
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
   assert.strictEqual(rangeMap.size, 1);
@@ -107,9 +143,36 @@ test('Annotation after collapsed whitespace', () => {
 test('Multiple annotations with whitespace collapse', () => {
   const nodes = [new MockTextNode('hello  world\tand  more')];
   const annotations = [
-    { text: 'hello' },
-    { text: 'world' },
-    { text: 'more' }
+    {
+      text: 'hello',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 5,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 12,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'more',
+      metadata: {
+        ranges: [{
+          startOffset: 18,
+          endOffset: 22,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
   ];
   
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -146,8 +209,17 @@ test('Annotation spanning multiple nodes with whitespace collapse', () => {
     new MockTextNode('hello  '),
     new MockTextNode('world\ttest')
   ];
-  const annotations = [{ text: 'hello world' }];
-  
+  const annotations = [{
+    text: 'hello world',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 2),
+      }],
+    },
+  }];
+
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
   assert.strictEqual(rangeMap.size, 1);
@@ -162,7 +234,16 @@ test('Annotation spanning multiple nodes with whitespace collapse', () => {
 
 test('Annotation not found', () => {
   const nodes = [new MockTextNode('hello world')];
-  const annotations = [{ text: 'nonexistent' }];
+  const annotations = [{
+    text: 'nonexistent',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 11,
+        nodes: [{ textContent: 'nonexistent' }],
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -173,7 +254,16 @@ test('Annotation not found', () => {
 
 test('Annotation at very beginning', () => {
   const nodes = [new MockTextNode('hello  world')];
-  const annotations = [{ text: 'hello' }];
+  const annotations = [{
+    text: 'hello',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
   
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
@@ -186,7 +276,16 @@ test('Annotation at very beginning', () => {
 
 test('Annotation at very end', () => {
   const nodes = [new MockTextNode('hello  world')];
-  const annotations = [{ text: 'world' }];
+  const annotations = [{
+    text: 'world',
+    metadata: {
+      ranges: [{
+        startOffset: 7,
+        endOffset: 12,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
   
   const rangeMap = getAnnotationRanges(nodes, annotations);
   
@@ -204,8 +303,26 @@ test('Complex multi-node scenario with various whitespace', () => {
     new MockTextNode('jumps')
   ];
   const annotations = [
-    { text: 'quick brown' },
-    { text: 'fox jumps' }
+    {
+      text: 'quick brown',
+      metadata: {
+        ranges: [{
+          startOffset: 5,
+          endOffset: 5,
+          nodes: nodes.slice(0, 2),
+        }],
+      },
+    },
+    {
+      text: 'fox jumps',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 5,
+          nodes: nodes.slice(1, 3),
+        }],
+      },
+    },
   ];
   
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -229,8 +346,26 @@ test('Complex multi-node scenario with various whitespace', () => {
 test('Overlapping text with different whitespace', () => {
   const nodes = [new MockTextNode('hello    world    test')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 14,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 9,
+          endOffset: 22,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -255,8 +390,26 @@ test('Overlapping text with different whitespace', () => {
 test('Overlapping text with different whitespace 2', () => {
   const nodes = [new MockTextNode('hello\n   world    test')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 14,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 9,
+          endOffset: 22,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -281,8 +434,26 @@ test('Overlapping text with different whitespace 2', () => {
 test('Consecutive special whitespace characters', () => {
   const nodes = [new MockTextNode('hello\n\n\nworld\t\n\ttest')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 13,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 8,
+          endOffset: 20,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -306,7 +477,16 @@ test('Consecutive special whitespace characters', () => {
 
 test('Mixed whitespace starting with spaces', () => {
   const nodes = [new MockTextNode('hello   \nworld    \ttest')];
-  const annotations = [{ text: 'hello world test' }];
+  const annotations = [{
+    text: 'hello world test',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 23,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -320,8 +500,26 @@ test('Mixed whitespace starting with spaces', () => {
 test('Form feed and carriage return characters', () => {
   const nodes = [new MockTextNode('hello\fworld\rtest')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 11,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 6,
+          endOffset: 16,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -346,8 +544,26 @@ test('Form feed and carriage return characters', () => {
 test('Exactly two whitespace characters boundary', () => {
   const nodes = [new MockTextNode('hello  world\n\ntest')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 12,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 18,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -371,7 +587,16 @@ test('Exactly two whitespace characters boundary', () => {
 
 test('Text starting and ending with collapsible whitespace', () => {
   const nodes = [new MockTextNode('  \nhello  world  \t')];
-  const annotations = [{ text: 'hello world' }];
+  const annotations = [{
+    text: 'hello world',
+    metadata: {
+      ranges: [{
+        startOffset: 3,
+        endOffset: 15,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -384,8 +609,26 @@ test('Text starting and ending with collapsible whitespace', () => {
 test('Very long whitespace sequences', () => {
   const nodes = [new MockTextNode('hello          world\n\n\n\n\n\n\n\n\n\ntest')];
   const annotations = [
-    { text: 'hello world' },
-    { text: 'world test' }
+    {
+      text: 'hello world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 20,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world test',
+      metadata: {
+        ranges: [{
+          startOffset: 15,
+          endOffset: 34,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -410,8 +653,26 @@ test('Very long whitespace sequences', () => {
 test('Non-breaking space should NOT be collapsed', () => {
   const nodes = [new MockTextNode('hello\u00A0\u00A0world\u00A0test')];
   const annotations = [
-    { text: 'hello\u00A0\u00A0world' }, // Should match exactly with double nbsp
-    { text: 'world\u00A0test' }      // Should match exactly with single nbsp
+    {
+      text: 'hello\u00A0\u00A0world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 12,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world\u00A0test',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 17,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -436,8 +697,26 @@ test('Non-breaking space should NOT be collapsed', () => {
 test('Em space and en space should NOT be collapsed', () => {
   const nodes = [new MockTextNode('hello\u2003\u2003world\u2002test')]; // em space + en space
   const annotations = [
-    { text: 'hello\u2003\u2003world' }, // Should match with double em space
-    { text: 'world\u2002test' }        // Should match with en space
+    {
+      text: 'hello\u2003\u2003world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 12,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world\u2002test',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 17,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -462,8 +741,26 @@ test('Em space and en space should NOT be collapsed', () => {
 test('Thin space and zero-width space should NOT be collapsed', () => {
   const nodes = [new MockTextNode('hello\u2009\u2009world\u200Btest')]; // thin space + zero-width space
   const annotations = [
-    { text: 'hello\u2009\u2009world' }, // Should match with double thin space
-    { text: 'world\u200Btest' }        // Should match with zero-width space
+    {
+      text: 'hello\u2009\u2009world',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 12,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    },
+    {
+      text: 'world\u200Btest',
+      metadata: {
+        ranges: [{
+          startOffset: 7,
+          endOffset: 17,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -488,7 +785,16 @@ test('Thin space and zero-width space should NOT be collapsed', () => {
 test('Mixed HTML and non-HTML whitespace', () => {
   const nodes = [new MockTextNode('hello  \u00A0world\n\n\u2003test')]; // HTML spaces + nbsp + newlines + em space
   const annotations = [
-    { text: 'hello \u00A0world \u2003test' } // Should collapse HTML whitespace but preserve Unicode whitespace exactly
+    {
+      text: 'hello \u00A0world \u2003test',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 20,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -502,7 +808,16 @@ test('Mixed HTML and non-HTML whitespace', () => {
 test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
   const nodes = [new MockTextNode('hello\u00A0world\u2003test')]; // Single nbsp and em space
   const annotations = [
-    { text: 'hello\u00A0world\u2003test' } // Should match exactly - no collapsing
+    {
+      text: 'hello\u00A0world\u2003test',
+      metadata: {
+        ranges: [{
+          startOffset: 0,
+          endOffset: 16,
+          nodes: nodes.slice(0, 1),
+        }],
+      },
+    }
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -516,7 +831,16 @@ test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
 
 test('Multiple occurrences of same annotation in single node', () => {
   const nodes = [new MockTextNode('hello world hello again')];
-  const annotations = [{ text: 'hello' }];
+  const annotations = [{
+    text: 'hello',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -540,7 +864,16 @@ test('Multiple occurrences across different nodes', () => {
     new MockTextNode('hello world '),
     new MockTextNode('hello again'),
   ];
-  const annotations = [{ text: 'hello' }];
+  const annotations = [{
+    text: 'hello',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -561,7 +894,16 @@ test('Multiple occurrences across different nodes', () => {
 
 test('Multiple occurrences with whitespace collapsing', () => {
   const nodes = [new MockTextNode('hello  world  hello  again')];
-  const annotations = [{ text: 'hello' }];
+  const annotations = [{
+    text: 'hello',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -582,7 +924,16 @@ test('Multiple occurrences with whitespace collapsing', () => {
 
 test('Three occurrences of same annotation', () => {
   const nodes = [new MockTextNode('test one test two test three')];
-  const annotations = [{ text: 'test' }];
+  const annotations = [{
+    text: 'test',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 4,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -605,7 +956,16 @@ test('Three occurrences of same annotation', () => {
 
 test('Overlapping text with multiple occurrences', () => {
   const nodes = [new MockTextNode('abcabc test abcabc')];
-  const annotations = [{ text: 'abc' }];
+  const annotations = [{
+    text: 'abc',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 3,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -629,10 +989,25 @@ test('Overlapping text with multiple occurrences', () => {
 
 test('Multiple annotations with multiple occurrences each', () => {
   const nodes = [new MockTextNode('cat dog cat mouse dog cat')];
-  const annotations = [
-    { text: 'cat' },
-    { text: 'dog' },
-  ];
+  const annotations = [{
+    text: 'cat',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 3,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }, {
+    text: 'dog',
+    metadata: {
+      ranges: [{
+        startOffset: 4,
+        endOffset: 7,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -659,7 +1034,16 @@ test('Multiple annotations with multiple occurrences each', () => {
 
 test('No occurrences should return empty ranges array', () => {
   const nodes = [new MockTextNode('hello world')];
-  const annotations = [{ text: 'nonexistent' }];
+  const annotations = [{
+    text: 'nonexistent',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 11,
+        nodes: [{ textContent: 'nonexistent' }],
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
@@ -674,7 +1058,16 @@ test('Multiple occurrences across nodes with whitespace collapse', () => {
     new MockTextNode('test\ttwo  '),
     new MockTextNode('test three')
   ];
-  const annotations = [{ text: 'test' }];
+  const annotations = [{
+    text: 'test',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 4,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
 
