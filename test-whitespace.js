@@ -1068,3 +1068,72 @@ test('Multiple occurrences across nodes with whitespace collapse', () => {
   assert.strictEqual(ranges[0].startOffset, 0);
   assert.strictEqual(ranges[0].endOffset, 4);
 });
+
+test('Multiple occurrences of same multi-node pattern', () => {
+  const nodes = [
+    new MockTextNode('hello'),
+    new MockTextNode('world'),
+    new MockTextNode(' test '),
+    new MockTextNode('hello'),
+    new MockTextNode('world'),
+  ];
+  const annotations = [{
+    text: 'helloworld',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: nodes.slice(0, 2),
+      }],
+    },
+  }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+
+  assert.strictEqual(ranges.length, 2);
+
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 0);
+  assert.strictEqual(ranges[0].endContainer, nodes[1]);
+  assert.strictEqual(ranges[0].endOffset, 5);
+
+  assert.strictEqual(ranges[1].startContainer, nodes[3]);
+  assert.strictEqual(ranges[1].startOffset, 0);
+  assert.strictEqual(ranges[1].endContainer, nodes[4]);
+  assert.strictEqual(ranges[1].endOffset, 5);
+});
+
+test('Multi-node annotation with partial node coverage', () => {
+  const nodes = [
+    new MockTextNode('one two three'),
+    new MockTextNode('four five'),
+    new MockTextNode('six'),
+    new MockTextNode('seven eight'),
+    new MockTextNode('nine ten'),
+  ];
+
+  const annotations = [{
+    text: 'two three four five six seven',
+    metadata: {
+      ranges: [{
+        startOffset: 4,
+        endOffset: 5,
+        nodes: nodes.slice(0, 4),
+      }],
+    },
+  }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 1);
+
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 4);
+  assert.strictEqual(ranges[0].endContainer, nodes[3]);
+  assert.strictEqual(ranges[0].endOffset, 5);
+});
