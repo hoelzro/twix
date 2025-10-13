@@ -1,76 +1,35 @@
+import assert from 'node:assert';
+
 export function getAnnotationRanges(nodes, annotations) {
-  let fullText = nodes.map(node => node.textContent).join('');
-  let indexMappings = [];
-  let preStartIndex = 0;
-  let postStartIndex = 0;
-  let fullTextCollapsed = '';
-
-  // XXX this RE probably needs refinement
-  for(let m of fullText.matchAll(/(?:[ \f\n\t\r]{2,})|[\f\n\t\r]+/gd)) {
-    let preEndIndex = m.index + m[0].length;
-    let postEndIndex = m.index - (preStartIndex - postStartIndex) + 1; // XXX I *think* this is correct, and that this is the best way?
-
-    fullTextCollapsed += fullText.substring(preStartIndex, m.index) + ' ';
-
-    indexMappings.push({
-      preStartIndex,
-      preEndIndex,
-      postStartIndex,
-      postEndIndex,
-    });
-
-    preStartIndex = preEndIndex;
-    postStartIndex = postEndIndex;
-  }
-
-  // XXX is this right, or is there an off-by-one error here?
-  if(preStartIndex < fullText.length - 1) {
-    indexMappings.push({
-      preStartIndex,
-      postStartIndex,
-
-      preEndIndex: fullText.length,
-      postEndIndex: postStartIndex + (fullText.length - preStartIndex),
-    });
-
-    fullTextCollapsed += fullText.substring(preStartIndex);
-  }
-
-  let nodePositions = nodes.reduce((accum, node) => accum.concat([{node, start: accum[accum.length - 1].end, end: accum[accum.length - 1].end + node.textContent.length}]), [{start: 0, end: 0}]).slice(1);
-
   let rangeMap = new Map();
 
   for(let annotation of annotations) {
-    let { text } = annotation;
     let ranges = [];
 
-    let startIndex = -1;
+    // XXX for now
+    assert.equal(annotation.metadata.ranges.length, 1);
 
-    while((startIndex = fullTextCollapsed.indexOf(text, startIndex + 1)) != -1) {
-      let endIndex = startIndex + text.length;
+    let { startOffset, endOffset, nodes: annotationNodes } = annotation.metadata.ranges[0];
 
-      let startMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= startIndex && startIndex < postEndIndex);
-      let endMapping = indexMappings.find(({postStartIndex, postEndIndex}) => postStartIndex <= endIndex && endIndex <= postEndIndex);
+    // XXX you have to use startOffset for this
+    //       do you, though? the node itself should probably match, even if the annotation doesn't cover the *entire* node?
+    let startIndices = Object.entries(nodes).filter(([i, n]) => n.textContent == annotationNodes[0].textContent).map(([i, _]) => parseInt(i));
 
-      // XXX try to come up with a better name for a new variable for this?
-      startIndex = startMapping.preStartIndex + (startIndex - startMapping.postStartIndex);
-      endIndex = endMapping.preStartIndex + (endIndex - endMapping.postStartIndex);
+    // XXX test situations where the first node matches but then subsequent nodes may or may not
+    for(let startIdx of startIndices) {
+      // XXX you have to use startOffset for this
+      // XXX you have to use endOffset for this
+      //       do you, though? the node itself should probably match, even if the annotation doesn't cover the *entire* node?
+      if(annotationNodes.every((n, offset) => startIdx + offset < nodes.length && nodes[startIdx + offset].textContent == n.textContent)) {
+        let range = document.createRange();
+        range.setStart(nodes[startIdx], startOffset);
+        range.setEnd(nodes[startIdx + annotationNodes.length - 1], endOffset);
 
-      let startPosition = nodePositions.find(({start, end}) => startIndex >= start && startIndex < end);
-      let endPosition = nodePositions.findLast(({start, end}) => endIndex > start && endIndex <= end)
-
-      let startOffset = startIndex - startPosition.start;
-      let endOffset = endIndex - endPosition.start;
-
-      let range = document.createRange();
-      range.setStart(startPosition.node, startOffset);
-      range.setEnd(endPosition.node, endOffset);
-
-      ranges.push(range);
+        ranges.push(range);
+      }
     }
 
     rangeMap.set(annotation, ranges);
-    // XXX there's this kind of "double mapping" there going on, which I find kinda convoluted and confusing
   }
 
   return rangeMap;
