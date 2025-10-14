@@ -8,7 +8,7 @@ export let annotationStore = {
   async getAnnotations(targetURL) {
     let results = await browser.storage.local.get();
 
-    return Object.entries(results).filter(([id, {url}]) => url == targetURL).map(([id, {selection}]) => ({id, text: selection}));
+    return Object.entries(results).filter(([id, {url}]) => url == targetURL).map(([id, {selection, ...rest}]) => ({id, text: selection, ...rest}));
   },
 
   async addAnnotation(url, attrs) {
