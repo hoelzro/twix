@@ -1,13 +1,12 @@
-import assert from 'node:assert';
-
 export function getAnnotationRanges(nodes, annotations) {
   let rangeMap = new Map();
 
   for(let annotation of annotations) {
     let ranges = [];
 
-    // XXX for now
-    assert.equal(annotation.metadata.ranges.length, 1);
+    if(annotation.metadata.ranges.length != 1) {
+      throw new Error('more than one range present in annotation metadata');
+    }
 
     let { startOffset, endOffset, nodes: annotationNodes } = annotation.metadata.ranges[0];
 
