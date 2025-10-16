@@ -854,6 +854,31 @@ test('Multiple occurrences of same annotation in single node', () => {
   assert.strictEqual(ranges[0].endOffset, 5);
 });
 
+test('Latter instance of multiple occurrences of same annotation in single node', () => {
+  const nodes = [new MockTextNode('hello world hello again')];
+  const annotations = [{
+    text: 'hello',
+    metadata: {
+      ranges: [{
+        startOffset: 12,
+        endOffset: 17,
+        nodes: nodes.slice(0, 1),
+      }],
+    },
+  }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 1);
+
+  // Should only match the first occurrence based on startOffset/endOffset
+  assert.strictEqual(ranges[0].startContainer, nodes[0]);
+  assert.strictEqual(ranges[0].startOffset, 12);
+  assert.strictEqual(ranges[0].endOffset, 17);
+});
+
 test('Multiple occurrences across different nodes', () => {
   const nodes = [
     new MockTextNode('hello world '),
