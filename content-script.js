@@ -60,7 +60,8 @@ browser.runtime.onMessage.addListener(function(msg) {
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
 
-    let followUpLinks = document.querySelectorAll('a[href="https://github/greggh/claude-code.nvim"]');
+    let followUpURLs = new Set(['https://github/greggh/claude-code.nvim']);
+    let followUpLinks = Array.from(document.querySelectorAll('a')).filter(a => followUpURLs.has(a.href));
     let followUpRanges = [];
     for(let link of followUpLinks) {
       let range = document.createRange();
