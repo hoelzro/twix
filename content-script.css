@@ -2,3 +2,8 @@
   background-color: yellow;
   color: black;
 }
+
+::highlight(follow-up-link) {
+  background-color: lightgreen;
+  color: black;
+}

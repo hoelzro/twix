@@ -59,6 +59,16 @@ browser.runtime.onMessage.addListener(function(msg) {
     }
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
+
+    let followUpLinks = document.querySelectorAll('a[href="https://github/greggh/claude-code.nvim"]');
+    let followUpRanges = [];
+    for(let link of followUpLinks) {
+      let range = document.createRange();
+      range.setStart(link, 0);
+      range.setEnd(link, 1); // XXX this *happens* to work, but will it continue to?
+      followUpRanges.push(range);
+    }
+    CSS.highlights.set('follow-up-link', new Highlight(...followUpRanges));
   } else if(msg.type == 'getSelectionMetadata') {
     let sel = document.getSelection();
 
