@@ -50,7 +50,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 
         newAnnotationId = await annotationStore.addAnnotation(tab.url, {
           annotation: null,
-          selection: info.selectionText,
+          text: info.selectionText,
           metadata: selectionMetadata,
         });
       }
@@ -67,7 +67,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
         let annotation = await prompt('Annotation');
         newAnnotationId = await annotationStore.addAnnotation(tab.url, {
           annotation,
-          selection: info.selectionText,
+          text: info.selectionText,
           metadata: selectionMetadata,
         });
       }
