@@ -19,7 +19,7 @@ function awaitBackgroundReady() {
 
 browser.runtime.onMessage.addListener(function(msg) {
   if(msg.type == 'annotationUpdate') {
-    let { annotations } = msg;
+    let { annotations, followUpURLs } = msg;
 
     let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let nodes = [];
@@ -60,7 +60,7 @@ browser.runtime.onMessage.addListener(function(msg) {
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
 
-    let followUpURLs = new Set(['https://github/greggh/claude-code.nvim']);
+    followUpURLs = new Set(followUpURLs);
     let followUpLinks = Array.from(document.querySelectorAll('a')).filter(a => followUpURLs.has(a.href));
     let followUpRanges = [];
     for(let link of followUpLinks) {
