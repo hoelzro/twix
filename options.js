@@ -28,11 +28,11 @@ import(browser.runtime.getURL('local-storage-store.js')).then(function({annotati
       for(let [url, annotations] of Object.entries(annotationsByURL)) {
         let highlights = [];
 
-        for(let {annotation, selection} of annotations) {
-          // XXX could selection contain things that would be interpreted as TW wikitext?
+        for(let {annotation, text} of annotations) {
+          // XXX could text contain things that would be interpreted as TW wikitext?
           highlights.push(`
 <<<
-${selection}
+${text}
 <<<
 
 ${annotation ?? ''}
