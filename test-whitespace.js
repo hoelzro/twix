@@ -1137,3 +1137,23 @@ test('Multi-node annotation with partial node coverage', () => {
   assert.strictEqual(ranges[0].endContainer, nodes[3]);
   assert.strictEqual(ranges[0].endOffset, 5);
 });
+
+test('bounds check verification', () => {
+  const nodes = [new MockTextNode('hello')];
+  const annotations = [{
+    text: 'hello world',
+    metadata: {
+      ranges: [{
+        startOffset: 0,
+        endOffset: 5,
+        nodes: [{ textContent: 'hello' }, { textContent: 'world' }],
+      }],
+    },
+  }];
+
+  const rangeMap = getAnnotationRanges(nodes, annotations);
+
+  assert.strictEqual(rangeMap.size, 1);
+  const ranges = rangeMap.get(annotations[0]);
+  assert.strictEqual(ranges.length, 0);
+});
