@@ -36,9 +36,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 
   switch(info.menuItemId) {
     case FOLLOW_UP_ID:
-      await annotationStore.addFollowUp(tab.url, {
-        targetURL: info.linkUrl,
-      });
+      await annotationStore.addFollowUp(tab.url, info.linkUrl);
       break;
     case HIGHLIGHT_ID:
       {
