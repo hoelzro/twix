@@ -83,10 +83,12 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
     }
   }
 
+  let followUpURLs = await annotationStore.getFollowUpURLs(tab.url);
+
   browser.tabs.sendMessage(tab.id, {
       type: 'annotationUpdate',
       annotations: annotations,
-      followUpURLs: ['https://github/greggh/claude-code.nvim'],
+      followUpURLs: followUpURLs,
   }, {
     frameId: info.frameId,
   });
@@ -96,13 +98,13 @@ addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
   if(request.type == 'fetchAnnotations') {
     return {
         annotations: await annotationStore.getAnnotations(request.url),
-        followUpURLs: ['https://github/greggh/claude-code.nvim'],
+        followUpURLs: await annotationStore.getFollowUpURLs(request.url),
     };
   } else if(request.type == 'ready') {
     browser.tabs.sendMessage(sender.tab.id, {
         type: 'annotationUpdate',
         annotations: await annotationStore.getAnnotations(sender.url),
-        followUpURLs: ['https://github/greggh/claude-code.nvim'],
+        followUpURLs: await annotationStore.getFollowUpURLs(sender.url),
     }, {
       frameId: sender.frameId,
     });

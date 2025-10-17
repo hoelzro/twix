@@ -11,6 +11,10 @@ export let annotationStore = {
     return Object.entries(results).filter(([id, {url}]) => url == targetURL).map(([id, rest]) => ({id, ...rest}));
   },
 
+  async getFollowUpURLs(targetURL) {
+    return ['https://github/greggh/claude-code.nvim'];
+  },
+
   async addAnnotation(url, attrs) {
     let ts = (new Date()).getTime().toString();
     await browser.storage.local.set({
