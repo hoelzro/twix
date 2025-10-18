@@ -81,12 +81,12 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
     }
   }
 
-  let followUpURLs = await annotationStore.getFollowUpURLs(tab.url);
+  let followUps = await annotationStore.getFollowUps(tab.url);
 
   browser.tabs.sendMessage(tab.id, {
       type: 'annotationUpdate',
       annotations: annotations,
-      followUpURLs: followUpURLs,
+      followUps: followUps,
   }, {
     frameId: info.frameId,
   });
@@ -96,13 +96,13 @@ addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
   if(request.type == 'fetchAnnotations') {
     return {
         annotations: await annotationStore.getAnnotations(request.url),
-        followUpURLs: await annotationStore.getFollowUpURLs(request.url),
+        followUps: await annotationStore.getFollowUps(request.url),
     };
   } else if(request.type == 'ready') {
     browser.tabs.sendMessage(sender.tab.id, {
         type: 'annotationUpdate',
         annotations: await annotationStore.getAnnotations(sender.url),
-        followUpURLs: await annotationStore.getFollowUpURLs(sender.url),
+        followUps: await annotationStore.getFollowUps(sender.url),
     }, {
       frameId: sender.frameId,
     });

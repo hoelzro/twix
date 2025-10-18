@@ -19,7 +19,7 @@ function awaitBackgroundReady() {
 
 browser.runtime.onMessage.addListener(function(msg) {
   if(msg.type == 'annotationUpdate') {
-    let { annotations, followUpURLs } = msg;
+    let { annotations, followUps } = msg;
 
     let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let nodes = [];
@@ -60,7 +60,7 @@ browser.runtime.onMessage.addListener(function(msg) {
 
     CSS.highlights.set('annotation-highlight', new Highlight(...allRanges));
 
-    followUpURLs = new Set(followUpURLs);
+    let followUpURLs = new Set(followUps.map(({followUpURL}) => followUpURL));
     let followUpLinks = Array.from(document.querySelectorAll('a')).filter(a => followUpURLs.has(a.href));
     let followUpRanges = [];
     for(let link of followUpLinks) {

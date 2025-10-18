@@ -11,10 +11,10 @@ export let annotationStore = {
     return Object.entries(results).filter(([id, {followUpURL, url}]) => !followUpURL && url == targetURL).map(([id, rest]) => ({id, ...rest}));
   },
 
-  async getFollowUpURLs(targetURL) {
+  async getFollowUps(targetURL) {
     let results = await browser.storage.local.get();
 
-    return Object.values(results).filter(({followUpURL, url}) => followUpURL && url == targetURL).map(({followUpURL}) => followUpURL);
+    return Object.entries(results).filter(([_, {followUpURL, url}]) => followUpURL && url == targetURL).map(([id, rest]) => ({id, ...rest}));
   },
 
   async addAnnotation(url, attrs) {
