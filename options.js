@@ -2,11 +2,13 @@ import(browser.runtime.getURL('local-storage-store.js')).then(function({annotati
   let exportButton = document.getElementById('export_button');
   exportButton.addEventListener('click', function() {
     annotationStore.getAllAnnotations().then(function(annotations) {
-      let annotationsByURL = Object.create(null);
+      let dataByURL = Object.create(null);
 
       for(let annotation of annotations) {
-        annotationsByURL[annotation.url] ??= [];
-        annotationsByURL[annotation.url].push(annotation);
+        dataByURL[annotation.url] ??= {
+          annotations: [],
+        };
+        dataByURL[annotation.url].annotations.push(annotation);
       }
 
       let tiddlers = [];
@@ -25,7 +27,7 @@ import(browser.runtime.getURL('local-storage-store.js')).then(function({annotati
 
       let creationDate = datePieces.map(({value, padding}) => value.toString().padStart(padding, '0')).join('');
 
-      for(let [url, annotations] of Object.entries(annotationsByURL)) {
+      for(let [url, {annotations}] of Object.entries(dataByURL)) {
         let highlights = [];
 
         for(let {annotation, text} of annotations) {
