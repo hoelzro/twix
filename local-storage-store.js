@@ -5,6 +5,12 @@ export let annotationStore = {
     return Object.entries(results).filter(([_, {followUpURL}]) => !followUpURL).map(([id, annotation]) => ({id, ...annotation}));
   },
 
+  async getAllFollowUps() {
+    let results = await browser.storage.local.get();
+
+    return Object.entries(results).filter(([_, {followUpURL}]) => followUpURL).map(([id, followUp]) => ({id, ...followUp}));
+  },
+
   async getAnnotations(targetURL) {
     let results = await browser.storage.local.get();
 
