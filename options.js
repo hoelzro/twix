@@ -1,14 +1,27 @@
 import(browser.runtime.getURL('local-storage-store.js')).then(function({annotationStore}) {
   let exportButton = document.getElementById('export_button');
   exportButton.addEventListener('click', function() {
-    annotationStore.getAllAnnotations().then(function(annotations) {
+
+    let annotationsPromise = annotationStore.getAllAnnotations();
+    let followUpsPromise = annotationStore.getAllFollowUps();
+
+    Promise.all([annotationsPromise, followUpsPromise]).then(function([annotations, followUps]) {
       let dataByURL = Object.create(null);
 
       for(let annotation of annotations) {
         dataByURL[annotation.url] ??= {
           annotations: [],
+          followUps: [],
         };
         dataByURL[annotation.url].annotations.push(annotation);
+      }
+
+      for(let followUp of followUps) {
+        dataByURL[followUp.url] ??= {
+          annotations: [],
+          followUps: [],
+        };
+        dataByURL[followUp.url].followUps.push(followUp);
       }
 
       let tiddlers = [];
@@ -27,7 +40,7 @@ import(browser.runtime.getURL('local-storage-store.js')).then(function({annotati
 
       let creationDate = datePieces.map(({value, padding}) => value.toString().padStart(padding, '0')).join('');
 
-      for(let [url, {annotations}] of Object.entries(dataByURL)) {
+      for(let [url, {annotations, followUps}] of Object.entries(dataByURL)) {
         let highlights = [];
 
         for(let {annotation, text} of annotations) {
@@ -40,7 +53,7 @@ ${text}
 ${annotation ?? ''}
           `);
         }
-        let followUps = ''; // XXX FIXME
+        followUps = followUps.map(({followUpURL}) => '  - ' + followUpURL).join('\n');
 
         let tiddlerTitle = 'New Tiddler'; // XXX FIXME
         let tiddlerBody = `
