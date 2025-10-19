@@ -159,10 +159,10 @@ ${followUps}
         // Import using the storage interface instead of direct browser.storage.local.set
         let importPromises = Object.entries(data).map(([id, attrs]) => {
           if (attrs.followUpURL) {
-            return annotationStore.addFollowUp(attrs.url, attrs.followUpURL);
+            return annotationStore.addFollowUp(attrs.url, attrs.followUpURL, id);
           } else {
             let {url, ...annotationAttrs} = attrs;
-            return annotationStore.addAnnotation(url, annotationAttrs);
+            return annotationStore.addAnnotation(url, annotationAttrs, id);
           }
         });
 

@@ -167,9 +167,9 @@ export let annotationStore = {
     return await getBookmarksByPrefix(folderId, FOLLOWUP_PREFIX);
   },
 
-  async addAnnotation(url, attrs) {
+  async addAnnotation(url, attrs, id = null) {
     const folderId = await getOrCreatePageFolder(url);
-    const ts = (new Date()).getTime().toString();
+    const ts = id || (new Date()).getTime().toString();
 
     await browser.bookmarks.create({
       parentId: folderId,
@@ -180,9 +180,9 @@ export let annotationStore = {
     return ts;
   },
 
-  async addFollowUp(url, followUpURL) {
+  async addFollowUp(url, followUpURL, id = null) {
     const folderId = await getOrCreatePageFolder(url);
-    const ts = (new Date()).getTime().toString();
+    const ts = id || (new Date()).getTime().toString();
 
     await browser.bookmarks.create({
       parentId: folderId,

@@ -23,16 +23,16 @@ export let annotationStore = {
     return Object.entries(results).filter(([_, {followUpURL, url}]) => followUpURL && url == targetURL).map(([id, rest]) => ({id, ...rest}));
   },
 
-  async addAnnotation(url, attrs) {
-    let ts = (new Date()).getTime().toString();
+  async addAnnotation(url, attrs, id = null) {
+    let ts = id || (new Date()).getTime().toString();
     await browser.storage.local.set({
       [ts]: { url: url, ...attrs },
     });
     return ts;
   },
 
-  async addFollowUp(url, followUpURL) {
-    let ts = (new Date()).getTime().toString();
+  async addFollowUp(url, followUpURL, id = null) {
+    let ts = id || (new Date()).getTime().toString();
     await browser.storage.local.set({
       [ts]: { url: url, followUpURL: followUpURL },
     });
