@@ -1,4 +1,4 @@
-import(browser.runtime.getURL('local-storage-store.js')).then(function({annotationStore}) {
+import(browser.runtime.getURL('bookmarks-store.js')).then(function({annotationStore}) {
   let exportButton = document.getElementById('export_button');
   let exportJsonButton = document.getElementById('export_json_button');
   let importJsonButton = document.getElementById('import_json_button');
