@@ -192,4 +192,10 @@ export let annotationStore = {
 
     return ts;
   },
+
+  async clearAll() {
+    const rootId = await ensureRootFolder();
+    await browser.bookmarks.removeTree(rootId);
+    rootFolderId = null;
+  },
 };

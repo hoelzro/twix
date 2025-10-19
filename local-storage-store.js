@@ -38,4 +38,8 @@ export let annotationStore = {
     });
     return ts;
   },
+
+  async clearAll() {
+    await browser.storage.local.clear();
+  },
 };

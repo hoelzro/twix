@@ -153,6 +153,9 @@ ${followUps}
           return;
         }
 
+        // Clear all existing data before importing
+        await annotationStore.clearAll();
+
         // Import using the storage interface instead of direct browser.storage.local.set
         let importPromises = Object.entries(data).map(([id, attrs]) => {
           if (attrs.followUpURL) {
