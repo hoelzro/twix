@@ -1,4 +1,4 @@
-import { annotationStore } from './local-storage-store.js';
+import { annotationStore } from './bookmarks-store.js';
 import { prompt } from './prompt.js';
 
 const FOLLOW_UP_ID = 'follow-up';
