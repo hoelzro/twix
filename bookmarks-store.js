@@ -194,8 +194,14 @@ export let annotationStore = {
   },
 
   async clearAll() {
-    const rootId = await ensureRootFolder();
-    await browser.bookmarks.removeTree(rootId);
+    // Search for existing root folder
+    const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
+    const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
+
+    if (rootFolder) {
+      await browser.bookmarks.removeTree(rootFolder.id);
+    }
+
     rootFolderId = null;
   },
 };
