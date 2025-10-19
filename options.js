@@ -1,5 +1,9 @@
 import(browser.runtime.getURL('local-storage-store.js')).then(function({annotationStore}) {
   let exportButton = document.getElementById('export_button');
+  let exportJsonButton = document.getElementById('export_json_button');
+  let importJsonButton = document.getElementById('import_json_button');
+  let importJsonInput = document.getElementById('import_json_input');
+
   exportButton.addEventListener('click', function() {
 
     let annotationsPromise = annotationStore.getAllAnnotations();
@@ -94,6 +98,85 @@ ${followUps}
       // XXX better way to signal error?
       console.error(e);
     });
+  });
+
+  exportJsonButton.addEventListener('click', function() {
+    let annotationsPromise = annotationStore.getAllAnnotations();
+    let followUpsPromise = annotationStore.getAllFollowUps();
+
+    Promise.all([annotationsPromise, followUpsPromise]).then(function([annotations, followUps]) {
+      let data = {};
+
+      annotations.forEach(annotation => {
+        let {id, ...attrs} = annotation;
+        data[id] = attrs;
+      });
+
+      followUps.forEach(followUp => {
+        let {id, ...attrs} = followUp;
+        data[id] = attrs;
+      });
+
+      let blobURL = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+
+      browser.downloads.download({
+        url: blobURL,
+        filename: 'annotations-export.json',
+      }).then(function(res) {
+        console.log(res);
+      }, function(e) {
+        console.error('error downloading JSON export', e);
+      });
+    }, function(e) {
+      console.error(e);
+    });
+  });
+
+  importJsonButton.addEventListener('click', function() {
+    importJsonInput.click();
+  });
+
+  importJsonInput.addEventListener('change', function() {
+    let file = importJsonInput.files[0];
+    if (!file) {
+      return;
+    }
+
+    let reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        let data = JSON.parse(e.target.result);
+
+        if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+          console.error('Invalid JSON format: expected object with ID keys');
+          alert('Invalid JSON format. Expected an object with annotation IDs as keys.');
+          return;
+        }
+
+        // Import using the storage interface instead of direct browser.storage.local.set
+        let importPromises = Object.entries(data).map(([id, attrs]) => {
+          if (attrs.followUpURL) {
+            return annotationStore.addFollowUp(attrs.url, attrs.followUpURL);
+          } else {
+            let {url, ...annotationAttrs} = attrs;
+            return annotationStore.addAnnotation(url, annotationAttrs);
+          }
+        });
+
+        Promise.all(importPromises).then(function() {
+          alert('Annotations imported successfully!');
+          importJsonInput.value = '';
+        }, function(err) {
+          console.error('Error importing annotations', err);
+          alert('Error importing annotations. See console for details.');
+        });
+      } catch (err) {
+        console.error('Error parsing JSON', err);
+        alert('Error parsing JSON file. Please ensure it is valid JSON.');
+      }
+    };
+
+    reader.readAsText(file);
   });
 });
 
