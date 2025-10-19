@@ -20,19 +20,13 @@ function hashURL(url) {
 }
 
 // Find or create the root "Rob's Annotations" folder
-let rootFolderId = null;
 async function ensureRootFolder() {
-  if (rootFolderId) {
-    return rootFolderId;
-  }
-
   // Search for existing root folder
   const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
   const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
 
   if (rootFolder) {
-    rootFolderId = rootFolder.id;
-    return rootFolderId;
+    return rootFolder.id;
   }
 
   // Create root folder under bookmarks root
@@ -41,8 +35,7 @@ async function ensureRootFolder() {
     type: 'folder'
   });
 
-  rootFolderId = created.id;
-  return rootFolderId;
+  return created.id;
 }
 
 // Find a page folder by URL hash
@@ -201,7 +194,5 @@ export let annotationStore = {
     if (rootFolder) {
       await browser.bookmarks.removeTree(rootFolder.id);
     }
-
-    rootFolderId = null;
   },
 };
