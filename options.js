@@ -156,23 +156,22 @@ ${followUps}
         // Clear all existing data before importing
         await annotationStore.clearAll();
 
-        // Import using the storage interface instead of direct browser.storage.local.set
-        let importPromises = Object.entries(data).map(([id, attrs]) => {
-          if (attrs.followUpURL) {
-            return annotationStore.addFollowUp(attrs.url, attrs.followUpURL, id);
-          } else {
-            let {url, ...annotationAttrs} = attrs;
-            return annotationStore.addAnnotation(url, annotationAttrs, id);
+        // Import sequentially to avoid race conditions with bookmark creation
+        try {
+          for (const [id, attrs] of Object.entries(data)) {
+            if (attrs.followUpURL) {
+              await annotationStore.addFollowUp(attrs.url, attrs.followUpURL, id);
+            } else {
+              let {url, ...annotationAttrs} = attrs;
+              await annotationStore.addAnnotation(url, annotationAttrs, id);
+            }
           }
-        });
-
-        Promise.all(importPromises).then(function() {
           alert('Annotations imported successfully!');
           importJsonInput.value = '';
-        }, function(err) {
+        } catch (err) {
           console.error('Error importing annotations', err);
           alert('Error importing annotations. See console for details.');
-        });
+        }
       } catch (err) {
         console.error('Error parsing JSON', err);
         alert('Error parsing JSON file. Please ensure it is valid JSON.');
