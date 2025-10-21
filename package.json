@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "eslint --fix"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.5.0",
+    "eslint": "^9.38.0"
+  }
+}
