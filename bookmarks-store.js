@@ -1,4 +1,4 @@
-const ROOT_FOLDER_NAME = "Rob's Annotations";
+const ROOT_FOLDER_NAME = "Twix Annotations";
 const URL_BOOKMARK_TITLE = "URL";
 const ANNOTATION_PREFIX = "Annotation-";
 const FOLLOWUP_PREFIX = "FollowUp-";
@@ -19,7 +19,7 @@ function hashURL(url) {
   return 'page-' + unsigned.toString(16).padStart(8, '0');
 }
 
-// Find or create the root "Rob's Annotations" folder
+// Find or create the root "Twix Annotations" folder
 async function ensureRootFolder() {
   // Search for existing root folder
   const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
