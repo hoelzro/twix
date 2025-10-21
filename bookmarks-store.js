@@ -19,6 +19,42 @@ function hashURL(url) {
   return 'page-' + unsigned.toString(16).padStart(8, '0');
 }
 
+// Lock management for root folder creation
+const LOCK_KEY = 'rootFolderCreationLock';
+const LOCK_TIMEOUT_MS = 5000; // 5 seconds
+const LOCK_CHECK_INTERVAL_MS = 50; // Check every 50ms
+
+async function acquireLock() {
+  while (true) {
+    const result = await browser.storage.local.get(LOCK_KEY);
+    const lock = result[LOCK_KEY];
+
+    // If no lock exists or lock is stale, try to acquire it
+    if (!lock || (Date.now() - lock.timestamp > LOCK_TIMEOUT_MS)) {
+      // Use a random ID for uniqueness
+      const ourLockId = Math.random();
+      await browser.storage.local.set({
+        [LOCK_KEY]: { id: ourLockId, timestamp: Date.now() }
+      });
+
+      // Verify we actually got the lock by reading it back
+      // (handles race where another context wrote after us)
+      const verification = await browser.storage.local.get(LOCK_KEY);
+      if (verification[LOCK_KEY]?.id === ourLockId) {
+        return; // We successfully acquired the lock
+      }
+      // Otherwise, someone else got it, loop and try again
+    }
+
+    // Wait before checking again
+    await new Promise(resolve => setTimeout(resolve, LOCK_CHECK_INTERVAL_MS));
+  }
+}
+
+async function releaseLock() {
+  await browser.storage.local.remove(LOCK_KEY);
+}
+
 // Find or create the root "Twix Annotations" folder
 async function ensureRootFolder() {
   // Search for existing root folder
@@ -29,13 +65,28 @@ async function ensureRootFolder() {
     return rootFolder.id;
   }
 
-  // Create root folder under bookmarks root
-  const created = await browser.bookmarks.create({
-    title: ROOT_FOLDER_NAME,
-    type: 'folder'
-  });
+  // Acquire lock before creating
+  await acquireLock();
 
-  return created.id;
+  try {
+    // Search again in case it was created while waiting for lock
+    const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
+    const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
+
+    if (rootFolder) {
+      return rootFolder.id;
+    }
+
+    // Create root folder under bookmarks root
+    const created = await browser.bookmarks.create({
+      title: ROOT_FOLDER_NAME,
+      type: 'folder'
+    });
+
+    return created.id;
+  } finally {
+    await releaseLock();
+  }
 }
 
 // Find a page folder by URL hash
