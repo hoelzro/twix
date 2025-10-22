@@ -138,7 +138,7 @@ ${followUps}
 
   importJsonInput.addEventListener('change', function() {
     let file = importJsonInput.files[0];
-    if (!file) {
+    if(!file) {
       return;
     }
 
@@ -147,7 +147,7 @@ ${followUps}
       try {
         let data = JSON.parse(e.target.result);
 
-        if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        if(typeof data !== 'object' || data === null || Array.isArray(data)) {
           console.error('Invalid JSON format: expected object with ID keys');
           alert('Invalid JSON format. Expected an object with annotation IDs as keys.');
           return;
@@ -158,8 +158,8 @@ ${followUps}
 
         // Import sequentially to avoid race conditions with bookmark creation
         try {
-          for (const [id, attrs] of Object.entries(data)) {
-            if (attrs.followUpURL) {
+          for(const [id, attrs] of Object.entries(data)) {
+            if(attrs.followUpURL) {
               await annotationStore.addFollowUp(attrs.url, attrs.followUpURL, id);
             } else {
               let {url, ...annotationAttrs} = attrs;
@@ -168,11 +168,11 @@ ${followUps}
           }
           alert('Annotations imported successfully!');
           importJsonInput.value = '';
-        } catch (err) {
+        } catch(err) {
           console.error('Error importing annotations', err);
           alert('Error importing annotations. See console for details.');
         }
-      } catch (err) {
+      } catch(err) {
         console.error('Error parsing JSON', err);
         alert('Error parsing JSON file. Please ensure it is valid JSON.');
       }

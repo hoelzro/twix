@@ -37,7 +37,7 @@ class MockTextNode {
 
 // Mock document for createRange
 global.document = {
-  createRange: () => new MockRange()
+  createRange: () => new MockRange(),
 };
 
 test('Single node annotation without whitespace collapse', () => {
@@ -68,7 +68,7 @@ test('Multi-node annotation without whitespace collapse', () => {
   const nodes = [
     new MockTextNode('hello '),
     new MockTextNode('world'),
-    new MockTextNode(' test')
+    new MockTextNode(' test'),
   ];
   const annotations = [{
     text: 'world test',
@@ -207,7 +207,7 @@ test('Multiple annotations with whitespace collapse', () => {
 test('Annotation spanning multiple nodes with whitespace collapse', () => {
   const nodes = [
     new MockTextNode('hello  '),
-    new MockTextNode('world\ttest')
+    new MockTextNode('world\ttest'),
   ];
   const annotations = [{
     text: 'hello world',
@@ -300,7 +300,7 @@ test('Complex multi-node scenario with various whitespace', () => {
   const nodes = [
     new MockTextNode('The  quick\t'),
     new MockTextNode('brown\n\nfox  '),
-    new MockTextNode('jumps')
+    new MockTextNode('jumps'),
   ];
   const annotations = [
     {
@@ -519,7 +519,7 @@ test('Form feed and carriage return characters', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -563,7 +563,7 @@ test('Exactly two whitespace characters boundary', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -628,7 +628,7 @@ test('Very long whitespace sequences', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -672,7 +672,7 @@ test('Non-breaking space should NOT be collapsed', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -716,7 +716,7 @@ test('Em space and en space should NOT be collapsed', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -760,7 +760,7 @@ test('Thin space and zero-width space should NOT be collapsed', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -794,7 +794,7 @@ test('Mixed HTML and non-HTML whitespace', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -817,7 +817,7 @@ test('Non-HTML whitespace should NOT trigger collapsing when alone', () => {
           nodes: nodes.slice(0, 1),
         }],
       },
-    }
+    },
   ];
 
   const rangeMap = getAnnotationRanges(nodes, annotations);
@@ -1043,7 +1043,7 @@ test('Multiple occurrences across nodes with whitespace collapse', () => {
   const nodes = [
     new MockTextNode('test  one\n'),
     new MockTextNode('test\ttwo  '),
-    new MockTextNode('test three')
+    new MockTextNode('test three'),
   ];
   const annotations = [{
     text: 'test',

@@ -41,7 +41,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
     case HIGHLIGHT_ID:
       {
         let selectionMetadata = await browser.tabs.sendMessage(tab.id, {
-            type: 'getSelectionMetadata',
+          type: 'getSelectionMetadata',
         }, {
           frameId: info.frameId,
         });
@@ -57,7 +57,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
     case ANNOTATE_ID:
       {
         let selectionMetadata = await browser.tabs.sendMessage(tab.id, {
-            type: 'getSelectionMetadata',
+          type: 'getSelectionMetadata',
         }, {
           frameId: info.frameId,
         });
@@ -84,9 +84,9 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
   let followUps = await annotationStore.getFollowUps(tab.url);
 
   browser.tabs.sendMessage(tab.id, {
-      type: 'annotationUpdate',
-      annotations: annotations,
-      followUps: followUps,
+    type: 'annotationUpdate',
+    annotations: annotations,
+    followUps: followUps,
   }, {
     frameId: info.frameId,
   });
@@ -95,9 +95,9 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
   if(request.type == 'ready') {
     browser.tabs.sendMessage(sender.tab.id, {
-        type: 'annotationUpdate',
-        annotations: await annotationStore.getAnnotations(sender.url),
-        followUps: await annotationStore.getFollowUps(sender.url),
+      type: 'annotationUpdate',
+      annotations: await annotationStore.getAnnotations(sender.url),
+      followUps: await annotationStore.getFollowUps(sender.url),
     }, {
       frameId: sender.frameId,
     });

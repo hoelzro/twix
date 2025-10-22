@@ -35,7 +35,7 @@ browser.runtime.onMessage.addListener(function(msg) {
       if(ranges.length !== 1) {
         let message = (ranges.length == 0
           ? `No matches found for annotation: "${annotation.text || annotation.selection}"`
-          :`${ranges.length} matches found for annotation: "${annotation.text || annotation.selection}"`);
+          : `${ranges.length} matches found for annotation: "${annotation.text || annotation.selection}"`);
 
         browser.runtime.sendMessage({
           type: 'showNotification',

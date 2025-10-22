@@ -1,7 +1,7 @@
-const ROOT_FOLDER_NAME = "Twix Annotations";
-const URL_BOOKMARK_TITLE = "URL";
-const ANNOTATION_PREFIX = "Annotation-";
-const FOLLOWUP_PREFIX = "FollowUp-";
+const ROOT_FOLDER_NAME   = 'Twix Annotations';
+const URL_BOOKMARK_TITLE = 'URL';
+const ANNOTATION_PREFIX  = 'Annotation-';
+const FOLLOWUP_PREFIX    = 'FollowUp-';
 
 // Hash a URL to create a deterministic folder name using FNV-1a
 function hashURL(url) {
@@ -9,7 +9,7 @@ function hashURL(url) {
   const FNV_PRIME = 16777619;
 
   let hash = FNV_OFFSET_BASIS;
-  for (let i = 0; i < url.length; i++) {
+  for(let i = 0; i < url.length; i++) {
     hash ^= url.charCodeAt(i);
     hash = Math.imul(hash, FNV_PRIME);
   }
@@ -25,22 +25,22 @@ const LOCK_TIMEOUT_MS = 5000; // 5 seconds
 const LOCK_CHECK_INTERVAL_MS = 50; // Check every 50ms
 
 async function acquireLock() {
-  while (true) {
+  while(true) {
     const result = await browser.storage.local.get(LOCK_KEY);
     const lock = result[LOCK_KEY];
 
     // If no lock exists or lock is stale, try to acquire it
-    if (!lock || (Date.now() - lock.timestamp > LOCK_TIMEOUT_MS)) {
+    if(!lock || (Date.now() - lock.timestamp > LOCK_TIMEOUT_MS)) {
       // Use a random ID for uniqueness
       const ourLockId = Math.random();
       await browser.storage.local.set({
-        [LOCK_KEY]: { id: ourLockId, timestamp: Date.now() }
+        [LOCK_KEY]: { id: ourLockId, timestamp: Date.now() },
       });
 
       // Verify we actually got the lock by reading it back
       // (handles race where another context wrote after us)
       const verification = await browser.storage.local.get(LOCK_KEY);
-      if (verification[LOCK_KEY]?.id === ourLockId) {
+      if(verification[LOCK_KEY]?.id === ourLockId) {
         return; // We successfully acquired the lock
       }
       // Otherwise, someone else got it, loop and try again
@@ -61,7 +61,7 @@ async function ensureRootFolder() {
   const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
   const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
 
-  if (rootFolder) {
+  if(rootFolder) {
     return rootFolder.id;
   }
 
@@ -73,14 +73,14 @@ async function ensureRootFolder() {
     const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
     const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
 
-    if (rootFolder) {
+    if(rootFolder) {
       return rootFolder.id;
     }
 
     // Create root folder under bookmarks root
     const created = await browser.bookmarks.create({
       title: ROOT_FOLDER_NAME,
-      type: 'folder'
+      type: 'folder',
     });
 
     return created.id;
@@ -104,7 +104,7 @@ async function findPageFolder(url) {
 async function getOrCreatePageFolder(url) {
   let folderId = await findPageFolder(url);
 
-  if (folderId) {
+  if(folderId) {
     return folderId;
   }
 
@@ -117,20 +117,20 @@ async function getOrCreatePageFolder(url) {
     folder = await browser.bookmarks.create({
       parentId: rootId,
       title: hash,
-      type: 'folder'
+      type: 'folder',
     });
 
     // Create URL bookmark inside the folder
     await browser.bookmarks.create({
       parentId: folder.id,
       title: URL_BOOKMARK_TITLE,
-      url: url
+      url: url,
     });
 
     return folder.id;
-  } catch (e) {
+  } catch(e) {
     // Clean up orphaned folder if URL bookmark creation failed
-    if (folder) {
+    if(folder) {
       await browser.bookmarks.remove(folder.id).catch(() => {});
     }
     throw e;
@@ -146,7 +146,7 @@ function encodeData(obj) {
 
 // Decode data from a bookmark URL
 function decodeData(bookmarkUrl) {
-  if (!bookmarkUrl || !bookmarkUrl.startsWith('data:application/json,')) {
+  if(!bookmarkUrl || !bookmarkUrl.startsWith('data:application/json,')) {
     return null;
   }
   const encoded = bookmarkUrl.substring('data:application/json,'.length);
@@ -172,7 +172,7 @@ export let annotationStore = {
     const pageFolders = await browser.bookmarks.getChildren(rootId);
 
     const allAnnotations = [];
-    for (const folder of pageFolders.filter(f => f.type === 'folder')) {
+    for(const folder of pageFolders.filter(f => f.type === 'folder')) {
       const annotations = await getBookmarksByPrefix(folder.id, ANNOTATION_PREFIX);
       allAnnotations.push(...annotations);
     }
@@ -185,7 +185,7 @@ export let annotationStore = {
     const pageFolders = await browser.bookmarks.getChildren(rootId);
 
     const allFollowUps = [];
-    for (const folder of pageFolders.filter(f => f.type === 'folder')) {
+    for(const folder of pageFolders.filter(f => f.type === 'folder')) {
       const followUps = await getBookmarksByPrefix(folder.id, FOLLOWUP_PREFIX);
       allFollowUps.push(...followUps);
     }
@@ -195,7 +195,7 @@ export let annotationStore = {
 
   async getAnnotations(targetURL) {
     const folderId = await findPageFolder(targetURL);
-    if (!folderId) {
+    if(!folderId) {
       return [];
     }
 
@@ -204,7 +204,7 @@ export let annotationStore = {
 
   async getFollowUps(targetURL) {
     const folderId = await findPageFolder(targetURL);
-    if (!folderId) {
+    if(!folderId) {
       return [];
     }
 
@@ -218,7 +218,7 @@ export let annotationStore = {
     await browser.bookmarks.create({
       parentId: folderId,
       title: ANNOTATION_PREFIX + ts,
-      url: encodeData({ url: url, ...attrs })
+      url: encodeData({ url: url, ...attrs }),
     });
 
     return ts;
@@ -231,7 +231,7 @@ export let annotationStore = {
     await browser.bookmarks.create({
       parentId: folderId,
       title: FOLLOWUP_PREFIX + ts,
-      url: encodeData({ url: url, followUpURL: followUpURL })
+      url: encodeData({ url: url, followUpURL: followUpURL }),
     });
 
     return ts;
@@ -242,7 +242,7 @@ export let annotationStore = {
     const results = await browser.bookmarks.search({ title: ROOT_FOLDER_NAME });
     const rootFolder = results.find(r => r.type === 'folder' && r.title === ROOT_FOLDER_NAME);
 
-    if (rootFolder) {
+    if(rootFolder) {
       await browser.bookmarks.removeTree(rootFolder.id);
     }
   },
