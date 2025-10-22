@@ -93,12 +93,7 @@ addAsyncListener(browser.menus.onClicked, async function(info, tab) {
 });
 
 addAsyncListener(browser.runtime.onMessage, async function(request, sender) {
-  if(request.type == 'fetchAnnotations') {
-    return {
-        annotations: await annotationStore.getAnnotations(request.url),
-        followUps: await annotationStore.getFollowUps(request.url),
-    };
-  } else if(request.type == 'ready') {
+  if(request.type == 'ready') {
     browser.tabs.sendMessage(sender.tab.id, {
         type: 'annotationUpdate',
         annotations: await annotationStore.getAnnotations(sender.url),
