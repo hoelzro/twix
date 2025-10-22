@@ -1,4 +1,9 @@
 {
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "{6ac364d1-94e9-4ac4-aa93-cce9d5bcf886}"
+      }
+    },
     "manifest_version": 2,
     "name": "Twix",
     "version": "0.1",
