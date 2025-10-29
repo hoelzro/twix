@@ -3,9 +3,14 @@
   "scripts": {
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "eslint --fix"
+    "format": "eslint --fix",
+    "test": "playwright test --reporter list",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@stylistic/eslint-plugin": "^5.5.0",
     "eslint": "^9.38.0"
   }
