@@ -12,6 +12,11 @@ export function getSelectionMetadata(document) {
         break;
       }
     }
+
+    if(w.currentNode.nodeType != Node.TEXT_NODE) {
+      w.nextNode();
+    }
+
     let nodes = [w.currentNode];
     let node;
     while(node = w.nextNode()) {
@@ -21,9 +26,12 @@ export function getSelectionMetadata(document) {
       }
     }
 
+    let startOffset = r.startContainer.nodeType == Node.TEXT_NODE ? r.startOffset : 0;
+    let endOffset   = r.endContainer.nodeType   == Node.TEXT_NODE ? r.endOffset : nodes[nodes.length - 1].textContent.length;
+
     ranges.push({
-      startOffset: r.startOffset,
-      endOffset: r.endOffset,
+      startOffset,
+      endOffset,
       nodes: nodes.map(({textContent}) => ({textContent})),
     });
   }

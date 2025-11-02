@@ -474,15 +474,11 @@ test.describe('getSelectionMetadata - Edge Cases', () => {
 
     const metadata = await getMetadata(page);
 
-    // BUG: This currently produces duplicate nodes instead of a single node
-    // Expected behavior: should have only one node
-    // Actual behavior: has two identical nodes
     expect(metadata).toEqual({
       ranges: [{
         startOffset: 0,
         endOffset: 55,
         nodes: [
-          { textContent: 'This is a simple paragraph with plain text for testing.' },
           { textContent: 'This is a simple paragraph with plain text for testing.' },
         ],
       }],
