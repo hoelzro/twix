@@ -452,4 +452,40 @@ test.describe('getSelectionMetadata - Edge Cases', () => {
     });
     expect(metadata.ranges[0].nodes.length).toBeGreaterThanOrEqual(1);
   });
+
+  test('should handle triple-click paragraph selection (element as container)', async ({ page }) => {
+    await setupPage(page, 'simple-text.html');
+
+    // Simulate triple-click behavior where the range container is the paragraph element itself
+    // rather than a text node within it
+    await page.evaluate(() => {
+      const para = document.querySelector('#simple');
+      const range = document.createRange();
+
+      // Triple-click sets the paragraph element as the container
+      // with startOffset=0 and endOffset=1 (selecting child nodes 0 through 1)
+      range.setStart(para, 0);
+      range.setEnd(para, 1);
+
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
+
+    const metadata = await getMetadata(page);
+
+    // BUG: This currently produces duplicate nodes instead of a single node
+    // Expected behavior: should have only one node
+    // Actual behavior: has two identical nodes
+    expect(metadata).toEqual({
+      ranges: [{
+        startOffset: 0,
+        endOffset: 55,
+        nodes: [
+          { textContent: 'This is a simple paragraph with plain text for testing.' },
+          { textContent: 'This is a simple paragraph with plain text for testing.' },
+        ],
+      }],
+    });
+  });
 });
